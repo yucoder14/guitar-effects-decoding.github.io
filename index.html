@@ -19,6 +19,13 @@
 		  border-bottom: 1px solid gray;
 		}
 
+		table {
+			display: flex;
+			justify-content: center;
+		  margin-right: 6em;
+		  margin-left: 6em;
+		}
+
 		p {
 		  padding: 1em;
 		  text-align: left;
@@ -26,16 +33,13 @@
 		  margin-left: 8em;
 		}
 
-		ul {
-		  padding: 1em;
-		  text-align: left;
-		  margin-right: 8em;
-		  margin-left: 8em;
-		}
 	</style>
   </head>
   <body>
 	<h1>Autoregressively Decoding Guitar Effects Chain</h1>
+	<h3> Winter-Spring 2026 Independent Study</h3>
+	<h4> Changwoo Yu • <a href="https://github.com/yucoder14/guitar_effects/tree/master">Source Code</a></h4>
+
 
 	<h2>Goals</h2> 
 	<p>
@@ -54,7 +58,7 @@
 		which is collection of pedals chained together into an effects chain. A pedal is a circuit designed to alter the incoming
 		audio to create different effects, ranging from distortion, chorus, compression, reverb, and so on. Each pedal has 
 		set of parameters, usually in forms of physical knobs, that controls how and/or how much the pedal influence incoming 
-		signal. <b>Figure 1</b> illustrates a simpiflied model of this system. 
+		signal. <b>Figure 1</b> illustrates a simpiflied model.
 	</p>
 
 	<div class="figure">
@@ -71,34 +75,134 @@
 	  <b>Figure 2.</b> Problem of audio effects parameter estimation.
 	</div>
 	<p>
-		While seasoned guitarists/audio engineers have keen command over various effects, it can be difficult for those with 
-		less experience to readily sequence and tune parameters of effects to create desired sound. 
+		The problem I am trying to tackle with machine learning belongs to a broader set of problems called audio effects parameter
+		estimation. In my case, I am specificallly interested in decoding both the sequence and parameters of pedals used given 
+		some wet signal. 
 	</p>
 
 	<h2>Data</h2>
 	<p>
+		For training and evaluating models, I have used the <a href="https://zenodo.org/records/7044411#.YzRx2XbMKUl">EGFxSet</a> and 
+		<a href="https://zenodo.org/records/7544110">IDMT-SMT-Guitar Dataset</a>. From both of the datasets, only the clean (no effects) 
+		recordings were used with the effects applied post hoc through Spotify's <a href="https://github.com/spotify/pedalboard">
+			pedalboard</a>. For monophonic data, playing of a single note was recorded. For polyphonic data, strumming of a single chord
+		was recorded. While meta data for the recordings were provided, they were not utilized for final training/evaluation.
+
+		Total of 5 effects were used: Compressor, Distortion, Chorus, Phaser, Reverb. 
+		Effects parameters were discretized into linear intervals.
+
+		In regards to tokenization of pedalboards, unique token was dedicated per bins per parameters per effects. 
+		A separator token was used to delineate parameters of effects.
 	</p>
+	<div class="figure">
+	  <img src=src/datapipe.png width=100%>
+	  </br>
+	  <b>Figure 3.</b> After loading the clean audio from the disk, a randomly generated pedalboard was applied to create the wet
+		audio. Simultaneously, the generated pedalboard was tokenized. 
+	</div>
 
 	<h2>Architecture</h2>
+	<p>
+		For the architecture, encoder-decoder model was chosen for its robust ability to map one sequence of tokens (audio) to another
+		sequence of tokens (pedal tokens). See <b>Figure 4.</b> for the architecture layout. For the encoder, 
+		<a href="https://github.com/descriptinc/descript-audio-codec">Descript Audio Codec's</a> 
+		encoder was used. For the decoder, a standard transformer architecture was used with cross attention enabled. The decoder 
+		consisted of 8 transformer layers with 8 heads. Excluding DAC's encoder weights, there were total of 9.8 million trainable 
+		parameters. During training, the encoder's weights were frozen, only descending on the weights of the decoder.
+	</p>
 	<div class="figure">
 	  <img src=src/architecture.png width=100%>
 	  </br>
-	  <b>Figure 3.</b>  
+	  <b>Figure 4.</b> Architecture layout
 	</div>
-	<p>
-	</p>
 
 	<h2>Results</h2>
 	<p>
+		Below are derived results after 3000 epochs. For most of iterations, the model seems to generate correct sequence of 
+		pedal tokens, which can then be parsed and translated back to a pedalboard. Below are some examples where the model
+		have predicted a pedalboard that produces similar wet audio as the gold pedalboard.
 	</p>
+	<table>	
+	  <tr>
+			<th>Dry Audio</th>
+			<th>Gold</th>
+			<th>Prediction</th>
+		</tr>	
+		<tr>
+			<th><audio controls> <source src=src/example_2_dry.wav type=audio/wav> </audio></th>
+			<th><audio controls> <source src=src/example_2_wet_gold.wav type=audio/wav> </audio></th>
+			<th><audio controls> <source src=src/example_2_wet_pred.wav type=audio/wav> </audio></th>
+		</tr>
+		<tr>
+			<th><audio controls> <source src=src/example_3_dry.wav type=audio/wav> </audio></th>
+			<th><audio controls> <source src=src/example_3_wet_gold.wav type=audio/wav> </audio></th>
+			<th><audio controls> <source src=src/example_3_wet_pred.wav type=audio/wav> </audio></th>
+		</tr>
+		<tr>
+			<th><audio controls> <source src=src/example_4_dry.wav type=audio/wav> </audio></th>
+			<th><audio controls> <source src=src/example_4_wet_gold.wav type=audio/wav> </audio></th>
+			<th><audio controls> <source src=src/example_4_wet_pred.wav type=audio/wav> </audio></th>
+		</tr>
+		<tr>
+			<th><audio controls> <source src=src/example_5_dry.wav type=audio/wav> </audio></th>
+			<th><audio controls> <source src=src/example_5_wet_gold.wav type=audio/wav> </audio></th>
+			<th><audio controls> <source src=src/example_5_wet_pred.wav type=audio/wav> </audio></th>
+		</tr>
+		<tr>
+			<th><audio controls> <source src=src/example_7_dry.wav type=audio/wav> </audio></th>
+			<th><audio controls> <source src=src/example_7_wet_gold.wav type=audio/wav> </audio></th>
+			<th><audio controls> <source src=src/example_7_wet_pred.wav type=audio/wav> </audio></th>
+		</tr>
+		<tr>
+			<th><audio controls> <source src=src/example_8_dry.wav type=audio/wav> </audio></th>
+			<th><audio controls> <source src=src/example_8_wet_gold.wav type=audio/wav> </audio></th>
+			<th><audio controls> <source src=src/example_8_wet_pred.wav type=audio/wav> </audio></th>
+		</tr>
+		<tr>
+			<th><audio controls> <source src=src/example_9_dry.wav type=audio/wav> </audio></th>
+			<th><audio controls> <source src=src/example_9_wet_gold.wav type=audio/wav> </audio></th>
+			<th><audio controls> <source src=src/example_9_wet_pred.wav type=audio/wav> </audio></th>
+		</tr>
+	</table>
+
+	<p>
+		Below are examples when the model failed to predict a pedalboard that produces similar wet audio as the gold pedalboard. 
+		Interestingly, for all of the cases below, it failed to detect that distortion was present in the wet audio.
+	</p>
+
+	<table>
+	  <tr>
+			<th>Dry Audio</th>
+			<th>Gold</th>
+			<th>Prediction</th>
+		</tr>	
+		<tr>
+			<th><audio controls> <source src=src/bad_example_1_dry.wav type=audio/wav> </audio></th>
+			<th><audio controls> <source src=src/bad_example_1_wet_gold.wav type=audio/wav> </audio></th>
+			<th><audio controls> <source src=src/bad_example_1_wet_pred.wav type=audio/wav> </audio></th>
+		</tr>
+		<tr>
+			<th><audio controls> <source src=src/bad_example_2_dry.wav type=audio/wav> </audio></th>
+			<th><audio controls> <source src=src/bad_example_2_wet_gold.wav type=audio/wav> </audio></th>
+			<th><audio controls> <source src=src/bad_example_2_wet_pred.wav type=audio/wav> </audio></th>
+		</tr>
+		<tr>
+			<th><audio controls> <source src=src/bad_example_3_dry.wav type=audio/wav> </audio></th>
+			<th><audio controls> <source src=src/bad_example_3_wet_gold.wav type=audio/wav> </audio></th>
+			<th><audio controls> <source src=src/bad_example_3_wet_pred.wav type=audio/wav> </audio></th>
+		</tr>
+	</table>
+	
 
 	<h2>Thoughts</h2>
 	<p>
+		There are many ways to improve the current design. Currently, quantization of the parameters naively split the range of 
+		the parameters in linear chunks. However, considering that human's audio perception is logarithmic, usage of logarithmic 
+		scale may help model learn representations that aligns with human perceptions. Secondly, tokenization procedure can be 
+		improved. As of now, it is not trivial to check the order of effects separate from their parameters. Thus, the model was 
+		never explictly rewarded for generating correct sequence of effects, which may have hurt model's ability to generalize. 
+		<br>
+		Overall, this was an interesting project that helped me deepen my understanding of transformers (at least their architecture) 
+		and think about application of machine learning in music information retrieval. 
 	</p>
-
-	<h2>Resources</h2>
-	<ul>
-	  <li></li>
-	</ul>
-  </body> 
 </html>
