@@ -1,18 +1,78 @@
 <!DOCTYPE html>
 <html>
   <head>
+	<style>
+		body {
+		  font-family: arial;
+		  text-align: center;
+		}
+
+		div.figure {
+		  margin-right: 8em;
+		  margin-left: 8em;
+		}
+
+		h2 {
+		  margin-right: 6em;
+		  margin-left: 6em;
+		  padding-bottom: 3px;
+		  border-bottom: 1px solid gray;
+		}
+
+		p {
+		  padding: 1em;
+		  text-align: left;
+		  margin-right: 8em;
+		  margin-left: 8em;
+		}
+
+		ul {
+		  padding: 1em;
+		  text-align: left;
+		  margin-right: 8em;
+		  margin-left: 8em;
+		}
+	</style>
   </head>
   <body>
 	<h1>Autoregressively Decoding Guitar Effects Chain</h1>
-	<img src=src/pedalboard.png>
 
-	<h2>Motivation</h2> 
+	<h2>Goals</h2> 
 	<p>
+		The gols for this independent study was twofold. First, I wanted to familiarize myself with machine learning concepts 
+		and PyTorch through a hands on project. With the recent developments with transformer based LLMs, I wanted a deeper 
+		dive into the transformer architecture. Second, I wanted to apply the techniques in a Music Information Retrieval (MIR)
+		task. As a novice electric guitarist, one of learning hurdles that I've yet to conquer is shaping the tone of the guitar
+		with the use of an effects chain. Upon taking Natural Language Processing, I wanted to explore whether a statistical 
+		model could tackle the problem of audio effect parameter estimation.
 	</p>
-	<img src=src/pedalboard_unknown.png>
 
 	<h2>Background</h2>
 	<p>
+		In music production, special audio effects can be applied to dry audio to modify timbre, pitch, time, and etc. 
+		to enhance musical expression or musicality of the audio. For electric guitars, this can be done with a pedal board,
+		which is collection of pedals chained together into an effects chain. A pedal is a circuit designed to alter the incoming
+		audio to create different effects, ranging from distortion, chorus, compression, reverb, and so on. Each pedal has 
+		set of parameters, usually in forms of physical knobs, that controls how and/or how much the pedal influence incoming 
+		signal. <b>Figure 1</b> illustrates a simpiflied model of this system. 
+	</p>
+
+	<div class="figure">
+	  <img src=src/pedalboard.png width=100%>
+	  </br>
+	  <b>Figure 1.</b> Upon going through series of pedal, dry audio signal from the electric guitar gets processed to wet audio
+	  signal
+	</div>
+
+	<h2>The Problem</h2>
+	<div class="figure">
+	  <img src=src/pedalboard_unknown.png width=100%>
+	  </br>
+	  <b>Figure 2.</b> Problem of audio effects parameter estimation.
+	</div>
+	<p>
+		While seasoned guitarists/audio engineers have keen command over various effects, it can be difficult for those with 
+		less experience to readily sequence and tune parameters of effects to create desired sound. 
 	</p>
 
 	<h2>Data</h2>
@@ -20,12 +80,25 @@
 	</p>
 
 	<h2>Architecture</h2>
-	<img src=src/architecture.png>
+	<div class="figure">
+	  <img src=src/architecture.png width=100%>
+	  </br>
+	  <b>Figure 3.</b>  
+	</div>
 	<p>
 	</p>
 
 	<h2>Results</h2>
 	<p>
 	</p>
+
+	<h2>Thoughts</h2>
+	<p>
+	</p>
+
+	<h2>Resources</h2>
+	<ul>
+	  <li></li>
+	</ul>
   </body> 
 </html>
